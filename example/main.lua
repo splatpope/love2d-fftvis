@@ -62,6 +62,7 @@ end
 function love.update(dt)
 	time = time + dt
 	
+	if love.keyboard.isDown("a") then fftvis.player.music:seek(math.ceil(fftvis.player.musicSize * 0.99), "samples") end
 	fftvis:update()
 
 	UpdateSpectrum = true --Tells the draw function it already has data to draw
@@ -133,6 +134,10 @@ function love.draw()
 	gfx.print("FPS : "..math.ceil(1/love.timer.getDelta()), 150, 70)
 	
 	
+end
+
+function love.keypressed(btn)
+	--if btn == "a" then fftvis.player.music:seek(math.ceil(fftvis.player.musicSize * 0.5)) end
 end
 
 stats={}

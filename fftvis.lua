@@ -25,12 +25,14 @@ function fftvis.load(self, song)
 	player:setSong(song)
 
 	player.music = love.audio.newSource(player.soundData)
-	player.musicSize = player.music:getDuration("samples")
+	player.musicSize = player.soundData:getSampleCount() --Per channel !!
 	player.tellTime = function (self) return self.music:tell("samples") end
 	player.channelCount = player.music:getChannelCount()
 	player.sampleRate = player.soundData:getSampleRate()
 
+	player.setMono = true
 	player.samples = self:loadSamples(player.soundData)
+	msg("diff : "..#player.samples-player.musicSize)
 
 	self.conf = {}
 	local conf = self.conf
@@ -75,9 +77,14 @@ function fftvis.loadSamples(self)
 	local samples = {}
 	local snd = self.player.soundData
 	local musicSize = self.player.musicSize
+	local channelCount = self.player.channelCount
 	
-	for i=1, musicSize do
-		samples[i] = snd:getSample(i)
+	for i=1, musicSize - 1 do
+		local curSample = 0
+		for j=1, channelCount do
+			curSample = curSample + snd:getSample(i, j)
+		end
+		samples[#samples + 1] = curSample
 	end
 	return samples
 end
@@ -85,19 +92,14 @@ end
 function fftvis.process(self, time)
 	local musicSize = self.player.musicSize
 	local musicPos = time or self.player:tellTime()
-	local channelCount = self.player.channelCount
 	local fftSize = self.conf.fftBinNum
 	local samples = self.player.samples
 	
 	local getfft = luafft.fft
 	local sampleBuffer = {}
 
-	for i = musicPos, musicPos + (fftSize - 1) do
-		if i + 2048 > musicSize then i = musicSize / 2 end
-
-		local curSample = 0
-		for j = 1, channelCount do curSample = curSample + samples[channelCount * i + (j-1)] / channelCount end
-	  	sampleBuffer[#sampleBuffer + 1] = newC(curSample, 0) --faster than table.insert(fft, new(curSample,0)) ?
+	for i = musicPos, musicPos + fftSize - 1 do
+	  	sampleBuffer[#sampleBuffer + 1] = newC(samples[i], 0) 
 	end
 	
 	return getfft(sampleBuffer, false)
@@ -150,7 +152,7 @@ function fftvis.update(self)
 	local music = self.player.music
 
 
-	if musicPos >= musicSize - fftSize * 3/2 then music:seek(0) end
+	if musicPos >= musicSize - fftSize + 1 then music:seek(1, "samples") end
 
 	self.fft.spectrum = self:process()
 	self.fft.fitSpectrum = self:fitToDisplay()

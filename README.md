@@ -1,8 +1,8 @@
 # love2d-fftvis
-![Screenshot](https://i.imgur.com/bMeSkRn.png)
+![Screenshot](https://i.imgur.com/Kryym4g.png)
 FFTVis a simple love2d module using luafft, designed to be used in music visualization.
 
-It exposes all the relevant fft options as well as some spectrum related attributes and functions.
+It exposes all the relevant fft options as well as some spectrum related features and a basic media player.
 
 # Dependencies
 You'll need to install the following dependencies:

@@ -34,12 +34,19 @@ function fftvis.load(self, song)
 	player.samples = self:loadSamples(player.soundData)
 	msg("diff : "..#player.samples-player.musicSize)
 
+	player.seekOffset = 0
+	player.seekDirection = 1
+	player.weight = 32
+	player.baseOffset = math.sqrt(player.weight)
+
 	self.conf = {}
 	local conf = self.conf
 
+	conf.sampleRate = player.sampleRate
+
 	conf.fftBinNum = 1024
 	conf.setfftBinNum = function (self, size) self.fftBinNum = size
-			self:initfftbinWidth() 
+			self:initfftBinWidth() 
 		end
 	conf.initfftBinWidth = function (self) self.fftBinWidth = self.fftBinNum / self.sampleRate end
 
@@ -145,14 +152,42 @@ function fftvis.normalize(self, spectrum, displayBound, clampBound)
 	return rs
 end
 
-function fftvis.update(self)
+function fftvis.update(self, dt)
 	local musicPos = self.player:tellTime()
 	local musicSize = self.player.musicSize
 	local fftSize = self.conf.fftBinNum
 	local music = self.player.music
+	local weight = fftvis.player.weight * 60
 
+	if not self.player.music:isPlaying() then self.player.music:play() end
+	if not love.keyboard.isDown("left") and not love.keyboard.isDown("right") then
+		seekOffset = 0
+	else
+		seekOffset = seekOffset + fftvis.player.seekDirection * dt * weight
+	end
+	if love.keyboard.isDown("a") then fftvis.player.music:seek(math.ceil(fftvis.player.musicSize * 0.99), "samples") end
+	if love.keyboard.isDown("left") 
+		then 
+			
+				fftvis.player.seekDirection = -2
+		end
+	if love.keyboard.isDown("right")
+		then 
+			fftvis.player.seekDirection = 1
+		end
 
-	if musicPos >= musicSize - fftSize + 1 then music:seek(1, "samples") end
+	local seekPos = fftvis.player:tellTime() + math.floor(seekOffset)
+
+	if  seekPos <= 0 then
+		seekPos = fftvis.player:tellTime()
+	elseif seekPos >= fftvis.player.musicSize - math.floor(seekOffset) - fftSize + 1 then
+		print(seekPos)
+		seekPos = 1
+		seekOffset = 1
+	end
+	if seekOffset ~= 0 then
+		fftvis.player.music:seek(seekPos, "samples") 
+	end
 
 	self.fft.spectrum = self:process()
 	self.fft.fitSpectrum = self:fitToDisplay()

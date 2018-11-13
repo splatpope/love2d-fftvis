@@ -7,7 +7,7 @@ function love.load()
 	ScreenSizeW = love.graphics.getWidth() --gets screen dimensions.
 	ScreenSizeH = love.graphics.getHeight() --gets screen dimensions.
 	
-	fftvis:load("OTB.ogg")
+	fftvis:load("Tribb.ogg")
 	print("fftvis has been loaded")
 
 	col = {}
@@ -51,19 +51,39 @@ function love.load()
 	}
 	]]
 
-	fftvis.conf:setDisplayRange(1/2)
-	fftvis.conf:setBarNum(32)
+	fractalShader = love.graphics.newShader[[
+	#define PI 3.1415926538
+	uniform float delta;
+	vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords){
+	
+
+		vec4 pixel = Texel(texture, texture_coords);
+		pixel.r = 200/255.0;
+		pixel.g = 1 - abs((10/255.0)*sin(delta*PI*2));
+		pixel.b = 0;
+	
+		return pixel;
+	}
+
+
+	]]
+	fftvis.conf:setfftBinNum(1024)
+	fftvis.conf:setDisplayRange(1/8)
+	fftvis.conf:setBarNum(128)
 
 	love.graphics.setBackgroundColor(200/255,200/255,200/255)
+
+	seekOffset = fftvis.player.seekOffset
 	
 end
 
 
 function love.update(dt)
 	time = time + dt
+
 	
-	if love.keyboard.isDown("a") then fftvis.player.music:seek(math.ceil(fftvis.player.musicSize * 0.99), "samples") end
-	fftvis:update()
+	fftvis:update(dt)
+
 
 	UpdateSpectrum = true --Tells the draw function it already has data to draw
 end
@@ -110,10 +130,10 @@ function love.draw()
 		gfx.setShader()
 	
     for i = 1, #spectrum do	
-		
+		local barHeight = -5-spectrum[i]*2
 		
 		--Actually draw the bins
-		gfx.setColor(i/#spectrum,1-i/#spectrum,10/255)
+		gfx.setColor(-barHeight/ScreenSizeH * 2, 1 + 2 *barHeight/ScreenSizeH,10/255)
 		gfx.rectangle("fill", (i-1)*barWidth+1, ScreenSizeH+5, barWidth-1, -5-spectrum[i]*2, 5, -5) --iterate over the list, and draws a rectangle for each band value.
 		gfx.setColor(col.white)
     end
@@ -131,7 +151,7 @@ function love.draw()
 	gfx.print("Current Sample : "..tell, 25, 10) 
 	gfx.print("Total Size : "..musicSize, 25, 40)
 	gfx.print("Time Elapsed : "..math.ceil(time).." s", 25, 70)
-	gfx.print("FPS : "..math.ceil(1/love.timer.getDelta()), 150, 70)
+	gfx.print("FPS : "..math.ceil(1/love.timer.getDelta()), 175, 70)
 	
 	
 end

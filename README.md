@@ -1,5 +1,5 @@
 # love2d-fftvis
-![Screenshot](https://i.imgur.com/pwZVgb3.png)
+![Screenshot](https://i.imgur.com/bMeSkRn.png)
 FFTVis a simple love2d module using luafft, designed to be used in music visualization.
 
 It exposes all the relevant fft options as well as some spectrum related attributes and functions.

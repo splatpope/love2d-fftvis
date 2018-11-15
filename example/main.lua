@@ -132,6 +132,7 @@ function love.draw()
 	gfx.setColor(col.white)
 	gfx.rectangle("line", ssw/2 - tgw/2, 5, tribby:getWidth(), 20)
 	gfx.print(math.ceil(10000 * tell/musicSize) / 100 .. "%", ScreenSizeW / 2- 15, 10)
+	--Display little arrows showing seeking direction
 	if fftvis.player.seekDirection < 0 then 
 		gfx.push()
 			gfx.setColor(0.9, 0.9, 0.9)

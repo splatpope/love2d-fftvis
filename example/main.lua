@@ -50,23 +50,7 @@ function love.load()
 		return pixel;
 	}
 	]]
-
-	fractalShader = love.graphics.newShader[[
-	#define PI 3.1415926538
-	uniform float delta;
-	vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords){
 	
-
-		vec4 pixel = Texel(texture, texture_coords);
-		pixel.r = 200/255.0;
-		pixel.g = 1 - abs((10/255.0)*sin(delta*PI*2));
-		pixel.b = 0;
-	
-		return pixel;
-	}
-
-
-	]]
 	fftvis.conf:setfftBinNum(1024)
 	fftvis.conf:setDisplayRange(1/8)
 	fftvis.conf:setBarNum(128)
@@ -101,7 +85,6 @@ function love.draw()
 		love.graphics.rectangle("fill", 0,0,ScreenSizeW, ScreenSizeH)
 		love.graphics.setColor(col.white)
 	gfx.setShader()
-
 	--BG image (cover art)
 	gfx.draw(tribby, ScreenSizeW/2, ScreenSizeH/2, 0, 1.5,1.5, tribby:getWidth()/2, tribby:getHeight()/2)
 	gfx.setColor(10/255,10/255,10/255)
@@ -140,13 +123,25 @@ function love.draw()
     
   end
  	gfx.setColor(50/255, 50/255, 50/255)
-	gfx.rectangle("fill", ScreenSizeH, 0, 20, 0) 
+	gfx.rectangle("fill", ScreenSizeH, 0, 20, 0)
 
+	local ssw = ScreenSizeW
+	local tgw = tribby:getWidth()
 	gfx.setColor(0.1, 0.8, 0.1)
-	gfx.rectangle("fill", (ScreenSizeW - tribby:getWidth()) / 2, 5, tribby:getWidth()*tell/musicSize, 20)	
+	gfx.rectangle("fill", ssw/2 - tgw/2, 5, tribby:getWidth()*tell/musicSize, 20)	
 	gfx.setColor(col.white)
-	gfx.rectangle("line", (ScreenSizeW - tribby:getWidth()) / 2, 5, tribby:getWidth(), 20)
+	gfx.rectangle("line", ssw/2 - tgw/2, 5, tribby:getWidth(), 20)
 	gfx.print(math.ceil(10000 * tell/musicSize) / 100 .. "%", ScreenSizeW / 2- 15, 10)
+	if fftvis.player.seekDirection < 0 then 
+		gfx.push()
+			gfx.setColor(0.9, 0.9, 0.9)
+			gfx.translate(ssw/2 - tgw/2 - 20, 15)
+			gfx.rotate(math.pi)
+			gfx.circle("fill", 0, 0, 10, 3) 
+		gfx.pop()
+	elseif fftvis.player.seekDirection > 0 then 
+		gfx.circle("fill", ssw/2 + tgw/2 + 20, 15, 10, 3) 
+	end
 
 	gfx.print("Current Sample : "..tell, 25, 10) 
 	gfx.print("Total Size : "..musicSize, 25, 40)
@@ -157,7 +152,6 @@ function love.draw()
 end
 
 function love.keypressed(btn)
-	--if btn == "a" then fftvis.player.music:seek(math.ceil(fftvis.player.musicSize * 0.5)) end
 end
 
 stats={}

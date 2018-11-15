@@ -2,8 +2,8 @@ luafft = require("LuaFFT/src/luafft")
 abs = math.abs 
 newC = complex.new 
 
+--Because ~bugs~
 local debugging = false
-
 local function msg(...)
 	if debugging == true then
 		print(...)
@@ -13,10 +13,11 @@ end
 
 
 fftvis = {}
+--Call this before anything else.
+--This function sets up the whole module with the proper variables.
 function fftvis.load(self, song)
+	--
 	assert(song)
-	
-	
 	
 	self.player = {}
 
@@ -162,6 +163,7 @@ function fftvis.update(self, dt)
 	if not self.player.music:isPlaying() then self.player.music:play() end
 	if not love.keyboard.isDown("left") and not love.keyboard.isDown("right") then
 		seekOffset = 0
+		fftvis.player.seekDirection = 0
 	else
 		seekOffset = seekOffset + fftvis.player.seekDirection * dt * weight
 	end
@@ -169,7 +171,7 @@ function fftvis.update(self, dt)
 	if love.keyboard.isDown("left") 
 		then 
 			
-				fftvis.player.seekDirection = -2
+			fftvis.player.seekDirection = -3
 		end
 	if love.keyboard.isDown("right")
 		then 

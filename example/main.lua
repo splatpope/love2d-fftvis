@@ -95,9 +95,6 @@ function love.draw()
   
 --Draw screenspace frequency bins
   if UpdateSpectrum then
-
-		
-
 		--Draw the visualizations
 		--This is arbitrary.
 		gfx.setShader(beatShader)

@@ -170,7 +170,6 @@ function fftvis.update(self, dt)
 	if love.keyboard.isDown("a") then fftvis.player.music:seek(math.ceil(fftvis.player.musicSize * 0.99), "samples") end
 	if love.keyboard.isDown("left") 
 		then 
-			
 			fftvis.player.seekDirection = -3
 		end
 	if love.keyboard.isDown("right")

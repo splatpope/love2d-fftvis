@@ -46,23 +46,34 @@ function fftvis.load(self, song)
 	conf.sampleRate = player.sampleRate
 
 	conf.fftBinNum = 1024
-	conf.setfftBinNum = function (self, size) self.fftBinNum = size
-			self:initfftBinWidth() 
-		end
-	conf.initfftBinWidth = function (self) self.fftBinWidth = self.fftBinNum / self.sampleRate end
+	conf.setfftBinNum = function (self, size) self.fftBinNum = size end
 
-	conf.setDisplayRange = function (self, fraction) self.displayRange = self.fftBinNum*fraction end
-	conf:setDisplayRange(1/8)
+	conf.setDisplayRange = function (self, range) self.displayRange = range end
+	conf:setDisplayRange(128)
 	conf.setBarNum = function (self, num) if num > self.displayRange then num = self.displayRange end self.barNum = num 
-			self:initBarWidth()
-			self:initBarStep()
 		end
-	conf.initBarWidth = function (self) self.barWidth = love.graphics.getWidth() / self.barNum end
-	conf.initBarStep = function (self) self.barStep =  love.graphics.getWidth() / self.displayRange end
 	conf:setBarNum(64) --Some values may average badly
 	
-	conf.smoothNum = 1
-	conf.smoothCoeff = 0.8 --Fiddle with this at your heart's content
+	conf.smoothNum = 1 -- Leave this at 1
+	conf.smoothCoeff = 0.8 --Fiddle with this at your heart's content (Values above 0.7 work best)
+
+	conf.update = function (self, s)
+		if s then
+			print ('update')	
+			if self.displayRange >= self.fftBinNum and self.barNum > 1 then 
+					self.displayRange = self.displayRange/2	
+			end
+
+			if self.displayRange <= self.barNum and self.displayRange < self.fftBinNum then
+				self.displayRange = self.displayRange * 2
+			end
+
+			self.fftBinWidth = self.fftBinNum / self.sampleRate
+			self.barWidth = love.graphics.getWidth() / self.barNum
+			self.barStep = love.graphics.getWidth() / self.displayRange
+		end
+	end
+	conf:update(true)
 	
 	self.fft = {[false] = 0}
 	local fft = self.fft
